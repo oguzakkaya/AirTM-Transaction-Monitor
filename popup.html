@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Airtm Monitor</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+    }
+    .status {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .status.active {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .status.inactive {
+      background: #ffebee;
+      color: #c62828;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button.start {
+      background: #4caf50;
+      color: white;
+    }
+    button.stop {
+      background: #f44336;
+      color: white;
+    }
+    .settings {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .settings-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .settings-row label {
+      flex: 1;
+    }
+    .settings-row input {
+      width: 60px;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .save-settings {
+      background: #2196f3;
+      color: white;
+      margin-top: 10px;
+    }
+    .log {
+      margin-top: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 12px;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="status" class="status inactive">Monitoring: Inactive</div>
+  <button id="toggleButton" class="start">Start Monitoring</button>
+  
+  <div class="settings">
+    <div class="settings-title">Settings</div>
+    <div class="settings-row">
+      <label for="checkInterval">Check Interval (seconds):</label>
+      <input type="number" id="checkInterval" min="1" max="60" value="5">
+    </div>
+    <button id="saveSettings" class="save-settings">Save Settings</button>
+  </div>
+
+  <div class="log" id="log"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
