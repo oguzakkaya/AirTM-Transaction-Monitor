@@ -7,6 +7,7 @@ A Chrome extension that monitors AirTM transactions in real-time, providing auto
 - Automatic notifications
 - Customizable check intervals
 - User-friendly interface
+- Telegram notifications
 
 ## Installation
 1. Clone this repository

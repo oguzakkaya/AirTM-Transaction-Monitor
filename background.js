@@ -61,16 +61,51 @@ function stopMonitoring() {
   }
 }
 
+// Telegram notification function
+async function sendTelegramNotification(message) {
+  try {
+    // Get bot token and chat ID from storage
+    const { telegramBotToken, telegramChatId } = await chrome.storage.sync.get(['telegramBotToken', 'telegramChatId']);
+    
+    if (!telegramBotToken || !telegramChatId) {
+      console.error('Telegram credentials not found');
+      return;
+    }
+
+    const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        chat_id: telegramChatId,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log('Telegram notification sent successfully');
+  } catch (error) {
+    console.error('Error sending Telegram notification:', error);
+  }
+}
+
 function injectMonitoringCode(interval) {
   function clickTargetButton() {
     try {
       const actionButton = document.querySelector('.card-p2p__action button');
       if (actionButton) {
         actionButton.click();
-        console.log('Butona tıklandı');
+        console.log('Button clicked');
+        // Send Telegram notification when button is clicked
+        sendTelegramNotification('New Transaction Found!\n\nButton clicked automatically.\nTime: ' + new Date().toLocaleString());
       }
     } catch (error) {
-      console.error('Buton tıklama hatası:', error);
+      console.error('Button click error:', error);
     }
   }
 
@@ -83,11 +118,11 @@ function injectMonitoringCode(interval) {
         const applyButton = document.querySelector('button.btn.btn--primary:not(.btn--block)');
         if (applyButton) {
           applyButton.click();
-          console.log('Filtreler yenilendi');
+          console.log('Filters refreshed');
         }
       }
     } catch (error) {
-      console.error('Filtre yenileme hatası:', error);
+      console.error('Filter refresh error:', error);
     }
   }
 
@@ -99,11 +134,11 @@ function injectMonitoringCode(interval) {
     
     if (currentState !== window.lastState) {
       if (currentState && !window.notificationSent) {
-        console.log('Yeni transaction bulundu!');
+        console.log('New transaction found!');
         chrome.runtime.sendMessage({
           action: 'notify',
-          title: 'Yeni Transaction!',
-          message: 'Yeni bir transaction request geldi!'
+          title: 'New Transaction!',
+          message: 'A new transaction request has arrived!'
         });
         clickTargetButton();
         window.notificationSent = true;
@@ -112,7 +147,7 @@ function injectMonitoringCode(interval) {
       }
       window.lastState = currentState;
     } else {
-      console.log('Kontrol edildi - ' + new Date().toLocaleTimeString());
+      console.log('Checked - ' + new Date().toLocaleTimeString());
     }
   }
 

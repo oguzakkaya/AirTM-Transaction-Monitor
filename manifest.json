@@ -11,7 +11,8 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://app.airtm.com/peer-transfers/available"
+    "https://app.airtm.com/peer-transfers/available",
+    "https://api.telegram.org/*"
   ],
   "action": {
     "default_popup": "popup.html",
