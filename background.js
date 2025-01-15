@@ -1,14 +1,12 @@
 let monitoringInterval = null;
 let isMonitoring = false;
 
-// URL kontrolü için yardımcı fonksiyon
 function isCorrectUrl(url) {
   return url === 'https://app.airtm.com/peer-transfers/available';
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (isMonitoring && changeInfo.url) {
-    // Eğer URL değiştiyse ve doğru URL değilse monitoring'i durdur
     if (!isCorrectUrl(changeInfo.url)) {
       stopMonitoring();
       chrome.runtime.sendMessage({action: 'monitoringStopped'});
@@ -31,6 +29,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({success: true});
   } else if (message.action === 'getState') {
     sendResponse({isMonitoring: isMonitoring});
+  } else if (message.action === 'sendTelegramNotification') {
+    sendTelegramNotification(message.text);
+    sendResponse({success: true});
   }
   return true;
 });
@@ -61,10 +62,8 @@ function stopMonitoring() {
   }
 }
 
-// Telegram notification function
 async function sendTelegramNotification(message) {
   try {
-    // Get bot token and chat ID from storage
     const { telegramBotToken, telegramChatId } = await chrome.storage.sync.get(['telegramBotToken', 'telegramChatId']);
     
     if (!telegramBotToken || !telegramChatId) {
@@ -101,8 +100,10 @@ function injectMonitoringCode(interval) {
       if (actionButton) {
         actionButton.click();
         console.log('Button clicked');
-        // Send Telegram notification when button is clicked
-        sendTelegramNotification('New Transaction Found!\n\nButton clicked automatically.\nTime: ' + new Date().toLocaleString());
+        chrome.runtime.sendMessage({
+          action: 'sendTelegramNotification',
+          text: 'New Transaction Found!\n\nButton clicked automatically.\nTime: ' + new Date().toLocaleString()
+        });
       }
     } catch (error) {
       console.error('Button click error:', error);
@@ -154,14 +155,12 @@ function injectMonitoringCode(interval) {
   window.notificationSent = false;
   window.lastState = true;
   
-  // Mevcut interval'i temizle
   if (window.monitorInterval) {
     clearInterval(window.monitorInterval);
   }
   
-  // Yeni interval başlat
   window.monitorInterval = setInterval(monitorTransactions, interval);
-  monitorTransactions(); // İlk kontrolü hemen yap
+  monitorTransactions();
   
-  console.log('Transaction monitor başlatıldı (' + interval/1000 + ' saniyede bir kontrol).');
+  console.log('Transaction monitor started (' + interval/1000 + ' seconds interval).');
 }
